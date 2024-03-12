@@ -1273,14 +1273,15 @@ select c_1,...,c_n from t2
 
 **Challenge**: California sales tax laws have changed and we need to alert our customers of this through email. What are the emails of the customers who live in California?
 
+SOLUTION:
 ```sql
 -- task: what are the emails of the customers that live in California
 -- California is a district in the address table
 
-select customer.first_name, customer.last_name, customer.email, address.district
-from customer
-right join address on customer.address_id = address.address_id
-where address.district = 'California'
+SELECT customer.first_name, customer.last_name, customer.email, address.district
+FROM customer
+RIGHT JOIN address ON customer.address_id = address.address_id
+WHERE address.district = 'California'
 
 -- this query returns the same information if we perform an inner join; we perform a right join to make sure that there is no person in California that does not have an email in the database
 ```
@@ -1296,17 +1297,16 @@ order by c.email asc
 
 **Challenge**: A customer walks in and is a huge fan of the actor "Nick Wahlberg" and wants to know which movies he is in. Get a list of all the movies "Nick Wahlberg" has been in.
 
+SOLUTION:
 ```sql
 -- task: get all Nick Wahlberg movies
 -- tables: film for the title, film_actor for relationship, actor for first and last name
 
-select actor.first_name, actor.last_name, film.title
-from actor
-join film_actor
- on actor.actor_id = film_actor.actor_id
-join film
- on film.film_id = film_actor.film_id
-where actor.first_name = 'Nick' and actor.last_name = 'Wahlberg'
+SELECT actor.first_name, actor.last_name, film.title
+FROM actor
+JOIN film_actor ON actor.actor_id = film_actor.actor_id
+JOIN film ON film.film_id = film_actor.film_id
+WHERE actor.first_name = 'Nick' AND actor.last_name = 'Wahlberg'
 ```
 
 Alternative:
@@ -1439,20 +1439,12 @@ from payment
 
 **Challenge**: During which months did payments occur? Format your answer to return back the full month name.
 
+SOLUTION:
 ```sql
 -- task: during which month did payments occur?
 
--- select extract(month from payment_date) <- this returns the months as a number
-select to_char(payment_date, 'Month')
-from payment
-group by to_char(payment_date, 'Month')
-```
-
-Alternative:
-
-```sql
-select distinct(to_char(payment_date, 'Month'))
-from payment
+SELECT DISTINCT(TO_CHAR(payment_date, 'Month'))
+FROM payment
 ```
 
 Alternative (ordering the month chronologically):
@@ -1475,13 +1467,13 @@ order by date_part
 
 **Challenge**: How many payments occurred on a Monday?
 
+SOLUTION:
 ```sql
 -- task: how many payments occured on a monday?
 
-select to_char(payment_date, 'day') as weekday, count(*)
-from payment
-group by weekday
--- this returns the list of weekday and it's corresponding number of payments
+SELECT COUNT(*)
+FROM payment
+WHERE EXTRACT(DOW FROM payment_date) = 1
 ```
 
 ```sql
@@ -1491,14 +1483,6 @@ where extract(dow from payment_date) = 1
 group by date_part
 
 -- for dow sunday (0) -> monday (1)
-```
-
-Alternative (more compact):
-
-```sql
-select count(*)
-from payment
-where extract(dow from payment_date) = 1
 ```
 
 ## 8.2. Mathematical Functions and Operators
@@ -1801,183 +1785,121 @@ Running Command:
 How can you retrieve all the information from the cd.facilities table?
 
 ```sql
-select *
-from cd.facility
+SELECT *
+from cd.facilites
 ```
 
 You want to print out a list of all of the facilities and their cost to members. How would you retrieve a list of only facility names and costs?
 
 ```sql
-select name, m_cost
-from cd.facility
+select name, membercost
+from cd.facilities
 ```
 
 How can you produce a list of facilities that charge a fee to members?
 
 ```sql
-select name, m_cost
-from cd.facility
-where m_cost > 0
+select name, membercost
+from cd.facilities
+where membercost != 0
 ```
 
 How can you produce a list of facilities that charge a fee to members, and that fee is less than 1/50th of the monthly maintenance cost? Return the facid, facility name, member cost, and monthly maintenance of the facilities in question.
 
 ```sql
-select fac_id, name, m_cost, maintenance
-from cd.facility
-where
- m_cost > 0
- and m_cost < maintenance/50.0
+select facid, name, membercost, monthlymaintenance
+from cd.facilities
+where membercost != 0 AND membercost < (monthlymaintenance/50)
 ```
 
 How can you produce a list of all facilities with the word 'Tennis' in their name?
 
 ```sql
-select *
-from cd.facility
-where name ilike '%tennis%'
+select name
+from cd.facilities
+where name ilike '%Tennis%'
 ```
 
 How can you retrieve the details of facilities with ID 1 and 5? Try to do it without using the OR operator.
 
 ```sql
 select *
-from cd.facility
-where fac_id in (1,5)
+from cd.facilities
+where facid IN(1,5)
 ```
 
 How can you produce a list of members who joined after the start of September 2012? Return the memid, surname, firstname, and joindate of the members in question.
 
 ```sql
-select *
-from cd.member
-where join_date between '2012-09-01' and now()
-```
-
-Alternative:
-
-```sql
-select *
-from cd.member
-where join_date::date >= '2012-09-01'
+select memid, surname, firstname, joindate
+from cd.members
+where joindate > '2012-09-01'
 ```
 
 How can you produce an ordered list of the first 10 surnames in the members table? The list must not contain duplicates.
 
 ```sql
-select distinct(last_name)
-from cd.member
-where last_name != 'GUEST'
-order by last_name
+select distinct surname
+from cd.members
+order by surname asc
 limit 10
 ```
 
 You'd like to get the signup date of your last member. How can you retrieve this information?
 
 ```sql
-select max(join_date)
-from cd.member
--- return max
-```
-
-Alternative 1:
-
-```sql
-select first_name, last_name, join_date
-from cd.member
-order by join_date desc
+select firstname, surname, joindate
+from cd.members
+order by joindate desc
 limit 1
--- order and limit
-```
-
-Alternative 2:
-
-```sql
-select first_name, last_name, join_date
-from cd.member
-where join_date in (
- select max(join_date)
- from cd.member
-)
--- where ... in clause; condition is single value
-```
-
-Alternative 3:
-
-```sql
-select first_name, last_name, join_date
-from cd.member as m_left
-join (
- select max(join_date) as max_join_date
- from cd.member
-) as m_right
-on m_left.join_date = m_right.max_join_date
--- inner join on single value
 ```
 
 Produce a count of the number of facilities that have a cost to guests of 10 or more.
 
 ```sql
-select count(*)
-from cd.facility
-where g_cost >= 10
+select COUNT(name)
+from cd.facilities
+WHERE guestcost >= 10
 ```
 
 Produce a list of the total number of slots booked per facility in the month of September 2012. Produce an output table consisting of facility id and slots, sorted by the number of slots.
 
 ```sql
-select fac_id, sum(slot) as booked_slots_sept
-from cd.booking
-where extract(month from start_time) = 9
--- where start_time::date >= '2012-09-01' and start_time::date <= '2012-10-01'
-group by fac_id
-order by sum(slot) asc
+select facid, sum(slots) as sum_of_slots
+from cd.bookings
+WHERE extract(month from starttime) = 9
+group by facid
+order by sum(slots) desc
 ```
 
 Produce a list of facilities with more than 1000 slots booked. Produce an output table consisting of facility id and total slots, sorted by facility id.
 
 ```sql
-select fac_id, sum(slot)
-from cd.booking
-group by fac_id
-having sum(slot) > 1000
-order by fac_id
+select facid, sum(slots)
+from cd.bookings
+group by facid
+HAVING sum(slots) > 1000
+order by facid desc
 ```
 
 How can you produce a list of the start times for bookings for tennis courts, for the date '2012-09-21'? Return a list of start time and facility name pairings, ordered by the time.
 
 ```sql
-select b.start_time, f.name
-from cd.booking as b
-join cd.facility as f on b.fac_id = f.fac_id
-where
- b.start_time::date = '2012-09-21'
- and f.name ilike '%tennis%court%'
-order by b.start_time
--- keyword as is optional
-```
-
-Alternative:
-
-```sql
-select start_time, f.name
-from cd.booking as b
-join cd.facility as f on b.fac_id = f.fac_id
-where
-  start_time between '2012-09-21' and '2012-09-22'
-  and f.name ilike '%tennis%court%'
-order by start_time
+select starttime, facilities.name
+from cd.bookings
+join cd.facilities on bookings.facid = facilities.facid
+where (starttime > '2012-09-21' AND starttime < '2012-09-22') 
+AND facilities.name ilike '%tennis%court%'
+order by starttime 
 ```
 
 How can you produce a list of the start times for bookings by members named 'David Farrell'?
 
 ```sql
-select start_time
-from cd.booking as b
-join cd.member as m on b.mem_id = m.mem_id
-where
- m.first_name = 'David'
- and m.last_name = 'Farrell'
+select members.firstname, members.surname, bookings.starttime
+from cd.bookings
+join cd.members on bookings.memid = members.memid
+where members.firstname = 'David' AND members.surname = 'Farrell'
 ```
 
 # 10. Creating Databases and Tables
