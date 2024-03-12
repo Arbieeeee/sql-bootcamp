@@ -224,7 +224,7 @@ select * from t1
 
 SOLUTION:
 ```sql
-SELECT first_name, last_name FROM customer;
+SELECT first_name, last_name, email FROM customer;
 ```
 
 ## 3.2. DISTINCT Keyword
