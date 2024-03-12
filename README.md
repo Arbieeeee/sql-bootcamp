@@ -222,6 +222,11 @@ select * from t1
 
 **Challenge**: we want to send out a promotional email to our existing customers. Grab the first and last names of every customer and their email address.
 
+SOLUTION:
+```sql
+SELECT first_name, last_name FROM customer;
+```
+
 ## 3.2. DISTINCT Keyword
 
 The `distinct` / `distinct()` **keyword**  can be used to return only the distinct values in a column.
@@ -235,6 +240,11 @@ select distinct(c) from t1
 ```
 
 **Challenge**: retrieve the distinct rating types out films could have in our database.
+
+SOLUTION:
+```sql
+SELECT DISTINCT(rating) FROM film;
+```
 
 ## 3.3. COUNT Function
 
@@ -277,32 +287,33 @@ where rental_rate >= 4 and replacement_cost >= 19.99 and rating = 'R'
 -- note that the COUNT function does not need a specific column, as it just counts the number of records expected to be returned by the SELECT statement
 ```
 
-**Challenge**: from now on we will focus more on directly asking the business related questions, to more realistically model a typical task. Find the email for the customer with the name Nancy Thomas. Solution:
+**Challenge**: from now on we will focus more on directly asking the business related questions, to more realistically model a typical task. Find the email for the customer with the name Nancy Thomas. 
 
+SOLUTION:
 ```sql
 -- task: find the email for the customer with the name Nancy Thomas
 
 -- return the columns of the customer table
 -- select * from customer where 1=0
 
-select email, first_name, last_name from customer
-where first_name = 'Nancy' and last_name = 'Thomas'
+SELECT first_name, last_name FROM customer
+WHERE first_name = 'Nancy' AND last_name = 'Thomas';
 ```
 
-**Challenge**: what is the movie Outlaw Hanky about? Solution:
+**Challenge**: what is the movie Outlaw Hanky about? 
 
+SOLUTION:
 ```sql
--- select * from film where 1=0
-select description from film
-where title = 'Outlaw Hanky'
+SELECT description FROM film
+WHERE title = 'Outlaw Hanky';
 ```
 
 **Challenge**: get the phone number for the customer who lives at 259 Ipoh Drive.
 
+SOLUTION:
 ```sql
--- select * from address where 1=0
-select phone from "address"
-where address='259 Ipoh Drive'
+SELECT phone FROM address
+WHERE address = '259 Ipoh Drive';
 ```
 
 ## 3.5. ORDER BY Clause
@@ -347,34 +358,35 @@ limit 5
 
 **Challenge**: we want to reward out first 10 paying customers. What are the customer ids of the first 10 customers who created a payment.
 
+SOLUTION:
 ```sql
 -- return columns names / layout of the table
 -- select * from payment limit 1
 
-select distinct(customer_id), payment_date from payment
--- where
-order by payment_date asc
-limit 10
+SELECT DISTINCT(customer_id), payment_date FROM payment
+ORDER BY payment_date ASC
+LIMIT 10
 -- assumption: we want to reward 10 different paying cusotmers
 ```
 
 **Challenge**: a customer wants to quickly rent a video to watch over their short lunch break. What are the titles of the 5 shortest (in length of runtime) movies?
 
+SOLUTION:
 ```sql
 -- see layout of the table film
 -- select * from film limit 1
 
-select title, "length" from film
--- where
-order by "length" asc
-limit 5
+SELECT title, "length" FROM film
+ORDER BY "length" ASC
+LIMIT 5
 ```
 
 **Challenge**: if a customer can watch a movie that is 50 minutes or less in run time, how many options does the customer have?
 
+SOLUTION:
 ```sql
-select count(title) from film
-where "length" <= 50
+SELECT COUNT(title) FROM film
+WHERE "length" <= 50
 ```
 
 ## 3.7. BETWEEN Operator
