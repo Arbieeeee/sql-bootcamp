@@ -3302,13 +3302,18 @@ select *
 from users;
 ```
 
-Solutions:
+Solution:
 
 ```sql
-select max(user_id), user_name, email
+--select max(user_id), user_name, email
+--from users
+--group by user_name, email
+--having count(user_name) > 1 and count(email) > 1
+
+select user_name, email, count(*) as no_of_duplicates
 from users
 group by user_name, email
-having count(user_name) > 1 and count(email) > 1
+having count(*) > 1
 ```
 
 Solution from video: Use a window function with `row_number()`.
@@ -3371,14 +3376,9 @@ select * from employee;
 Solution:
 
 ```sql
-with rn as (
-	select *, row_number() over(order by emp_id) as rn
-	from employee
-)
-
-select *
-from rn
-where rn = 2
+select * from employee
+order by emp_ID
+limit 1 offset 1
 ```
 
 ## 18.3. Exercise 3
@@ -3428,27 +3428,16 @@ select * from employee;
 Solution:
 
 ```sql
-with max_salary as (
-	select dept_name, max(salary)
-	from employee
-	group by dept_name
-), min_salary as (
-	select dept_name, min(salary)
-	from employee
-	group by dept_name
+WITH r AS (
+    SELECT emp_name, dept_name, salary,
+        RANK() OVER (PARTITION BY dept_name ORDER BY SALARY) salary_min,
+        RANK() OVER (PARTITION BY dept_name ORDER BY SALARY DESC) salary_max
+    FROM employee
 )
 
-select
-	e.emp_id, e.emp_name, e.dept_name, e.salary,
-	case
-		when e.salary = mas.max then 'Highest Salary'
-		else 'Lowest Salary'
-	end as description
-from employee e, max_salary mas, min_salary mis
-where
-	e.dept_name = mas.dept_name and e.salary = mas.max or
-	e.dept_name = mis.dept_name and e.salary = mis.min
-order by e.dept_name, salary desc
+SELECT emp_name, dept_name, salary
+FROM r
+WHERE salary_max = 1 OR salary_min = 1
 ```
 
 ## 18.4. Exercise 4
@@ -3483,8 +3472,9 @@ insert into doctors values
 Solution:
 
 ```sql
-select d1.id, d1.name, d1.speciality, d1.hospital, d1.city, d1.consultation_fee
-from doctors d1 join doctors d2 on d1.hospital = d2.hospital and d1.speciality != d2.speciality
+select d2.id, d2.name, d2.speciality, d2.hospital, d2.city, d2.consultation_fee from doctors d
+join doctors d2 on d2.hospital = d.hospital
+where d2.speciality != d.speciality
 ```
 
 ## 18.5. Exercise 5
@@ -3522,118 +3512,11 @@ insert into login_details values
 Solution:
 
 ```sql
-with l as (
-	select *, lag(user_name) over w as prev_user1, lag(user_name,2) over w as prev_user2
-	from login_details
-	window w as (order by login_date, login_id)
-)
-
-select *
-from l
-where user_name = prev_user1 and prev_user1 = prev_user2
-```
-
-Alternative solution:
-
-```sql
-with rep as (
-	select
-		*,
-		case
-			when lag(user_name) over (order by login_date) = user_name then 'repeat'
-			else 'not repeat'
-		end as rep
-	from login_details
-), cume_rep as (
-	select
-		*,
-		case
-			when rep = 'repeat' and lag(rep) over (order by login_date) = rep then 1
-			else 0
-		end as cume_rep
-	from rep
-)
-
-select *
-from cume_rep
-where cume_rep = 1
-```
-
-Better alternative solution. This solution also counts the number of consecutive logins by the user.
-
-```sql
-with rep as (
-	select
-		*,
-		case
-			when lag(user_name) over(order by login_date) = user_name then 1
-			else 0
-		end as rep
-	from login_details
-), island_head as (
-	select
-		*,
-		case
-			when
-				rep = 0 and lead(rep) over(order by login_date) = 1 then login_id
-		end as island_head
-	from rep
-), island_id as(
-	select
-		*,
-		case
-			when rep = 1 then max(island_head) over(order by login_date)
-			when rep = 0 then island_head
-		end as island_id
-	from island_head
-)
-
-select
-	*,
-	count(island_id) over(partition by island_id order by login_date rows between unbounded preceding and unbounded following)
-from island_id
-order by login_date, island_head
-```
-
-To make the result set more compact:
-
-```sql
-with rep as (
-	select
-		*,
-		case
-			when lag(user_name) over(order by login_date) = user_name then 1
-			else 0
-		end as rep
-	from login_details
-), island_head as (
-	select
-		*,
-		case
-			when
-				rep = 0 and lead(rep) over(order by login_date) = 1 then login_id
-		end as island_head
-	from rep
-), island_id as(
-	select
-		*,
-		case
-			when rep = 1 then max(island_head) over(order by login_date)
-			when rep = 0 then island_head
-		end as island_id
-	from island_head
-), island as(
-	select
-		*,
-		count(island_id) over(partition by island_id order by login_date rows between unbounded preceding and unbounded following) as consecutive_logins
-	from island_id
-)
-
-select  island_id, consecutive_logins, user_name
-from island
-where consecutive_logins != 0
-group by island_id, consecutive_logins, user_name
-order by island_id
+SELECT user_name,login_date, COUNT(login_date) AS Occurences
+FROM login_details
+GROUP BY login_date, user_name
+HAVING COUNT(login_date) >= 3
+ORDER BY login_date
 ```
 
 ## 18.6. Exercise 6
@@ -3663,12 +3546,11 @@ insert into students values
 Solution:
 
 ```sql
-select
-	*,
+select *, 
 	case
 		when id % 2 = 1 then lead(student_name,1,student_name) over()
-		when id % 2 = 0 then lag(student_name,1,student_name) over()
-	end as new_student_name
+		when id % 1 = 0 then lag(student_name,1,student_name) over()
+	end as new_student
 from students
 ```
 
@@ -3705,42 +3587,25 @@ insert into weather values
 Solution:
 
 ```sql
-with
-streak as (
-  select *,
-	case
-		when temperature < 0 and lag(temperature) over (order by id) >= 0 then id -- head (does consider first record)
-		when temperature < 0 and lead(temperature) over (order by id) < 0 then 1 -- body
-		when temperature < 0 and lead(temperature) over (order by id) >= 0 then 1 -- tail
-		when temperature < 0 then 1 --handles the last record
-	end as streak
-  from weather),
-island_id as (
-	select
-		*,
-		case
-			when streak is not null then max(streak) over(order by id)
-		end as island_id
-		from streak),
-island_size as (
-	select
-		*,
-		count(island_id) over(partition by island_id order by id rows between unbounded preceding and unbounded following) as island_size
-	from island_id
-)
-
-select id, city, temperature, day, island_size
-from island_size
-where island_size >= 3
-order by id
+WITH consecutiveValues AS (
+	SELECT *, ROW_NUMBER() OVER(ORDER BY id) AS RNum,
+	id -  ROW_NUMBER() OVER(ORDER BY id) AS data_grouping
+	FROM weather 
+	WHERE temperature < 0 ),
+ValuesCounted AS (
+	SELECT *, COUNT(*) OVER(PARTITION BY data_grouping) as consecutiveValueCount 
+	FROM consecutiveValues )
+	
+SELECT id, day, temperature FROM ValuesCounted 
+WHERE consecutiveValueCount >= 3;
 ```
 
-## 18.8. Exercise 9
+## 18.8. Exercise 8
 
 We skipped exercise 9 because the task was not clear.
 
 ```sql
--- Query 9:
+-- Query 8:
 -- Find the top 2 accounts with the maximum number of unique patients on a monthly basis.
 -- Note: Prefer the account if with the least value in case of same number of unique patients
 
