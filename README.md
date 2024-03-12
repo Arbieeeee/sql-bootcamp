@@ -502,38 +502,35 @@ where amount > 5
 How many actors have a first name that starts with the letter P?
 
 ```sql
-select count(distinct(actor_id))
-from actor
-where first_name ilike 'p%'
+SELECT COUNT(DISTINCT(actor_id)) from actor
+WHERE first_name ILIKE 'P%'
 ```
 
 How many unique districts are our customers from?
 
 ```sql
-select count(distinct(district)) from address
--- where
+SELECT COUNT(DISTINCT(district)) FROM address
 ```
 
 Retrieve the list of names for those distinct districts from the previous question.
 
 ```sql
-select distinct(district) from address
--- where
+SELECT DISTINCT(district) FROM address
 ```
 
 How many films have a rating of R and a replacement cost between $5 and $15? ([*](https://xzilla.net/blog/2007/Sep/PostgreSQL-8.3-Features-Enum-Datatype.html))
 
 ```sql
-select count(title) from film
-where rating = 'R' and replacement_cost between 5 and 15
--- note that rating is mpaa_rating data type
+SELECT COUNT(title) FROM film
+WHERE (rating = 'R') AND 
+(replacement_cost BETWEEN 5 AND 15)
 ```
 
 How many films have the word Truman somewhere in the title?
 
 ```sql
-select count(title) from film
-where title ilike '%truman%'
+SELECT COUNT(title) FROM film
+WHERE title ILIKE '%Truman%'
 ```
 
 # 5. GROUP BY Statements & Aggregate Functions
@@ -827,9 +824,10 @@ order by sum(amount) desc
 
 **Challenge**: We have two staff members, with Staff IDs 1 and 2. We want to give a bonus to the staff member that handled the most payments. (Most in terms of number of payments processed, not total dollar amount). How many payments did each staff member handle and who gets the bonus?
 
+SOLUTION:
 ```sql
-select staff_id, count(payment_id) from payment
-group by staff_id
+SELECT staff_id, count(payment_id) FROM payment
+GROUP BY staff_id
 ```
 
 Alternative solution:
@@ -845,21 +843,21 @@ order by count(distinct(payment_id)) desc
 
 **Challenge**: Corporate HQ is conducting a study on the relationship between replacement cost and a movie MPAA rating. What is the average replacement cost per MPAA rating?
 
+SOLUTION:
 ```sql
-select rating, round(avg(replacement_cost),2)
-from film
-group by rating
-order by avg(replacement_cost) desc
+SELECT rating, ROUND(AVG(replacement_cost), 2) FROM film
+GROUP BY rating
+ORDER BY AVG(replacement_cost) DESC
 ```
 
 **Challenge**: We are running a promotion to reward our top 5 customers with coupons. What are the customer ids of the top 5 customers by total spend?
 
+SOLUTION:
 ```sql
-select customer_id, round(sum(amount),2)
-from payment
-group by customer_id
-order by sum(amount) desc
-limit 5
+SELECT customer_id, SUM(amount) FROM payment
+GROUP BY customer_id
+ORDER BY SUM(amount) DESC
+LIMIT 5
 ```
 
 Alternative: 
@@ -934,29 +932,22 @@ having count(customer_id) >= 300
 
 **Challenge**: We are launching a platinum service for our most loyal customers. We will assign platinum status to customers that have had 40 or more transaction payments. What customer_ids are eligible for platinum status?
 
+SOLUTION:
 ```sql
-select customer_id, count(*)
-from payment
-group by customer_id
-having count(*) >= 40
+SELECT customer_id, COUNT(*) FROM payment
+GROUP BY customer_id
+HAVING COUNT(*) >= 40
 ```
 
 **Challenge**: What are the customer ids of customers who have spent more than $100 in payment transactions with our staff_id member 2?
 
+SOLUTION:
 ```sql
-select
-    customer_id,
-    sum(amount)
-from
-    payment
-where
-    staff_id = 2
-group by
-    customer_id
-having
-    sum(amount) > 100
-order by
-    sum(amount) desc
+SELECT customer_id, SUM(amount) FROM payment
+WHERE staff_id = 2
+GROUP BY customer_id
+HAVING SUM(amount) > 100
+ORDER BY SUM(amount) DESC
 ```
 
 # 6. Assessment Test 1
@@ -964,44 +955,28 @@ order by
 Return the customer IDs of customers who have spent at least $110 with the staff member who has an ID of 2.
 
 ```sql
-select staff_id, customer_id, sum(amount)
-from payment
-where staff_id = 2
-group by staff_id, customer_id
-having sum(amount) > 110
+SELECT staff_id, customer_id, SUM(amount) FROM payment
+WHERE staff_id = 2
+GROUP BY staff_id, customer_id
+HAVING SUM(amount) >= 110
+ORDER BY SUM(amount) DESC
 ```
 
 How many films begin with the letter J?
 
 ```sql
-select count(title)
-from film
-where title like 'J%'
+SELECT COUNT(title) FROM film
+WHERE title LIKE 'J%'
 ```
 
 What customer has the highest customer ID number whose name starts with an 'E' and has an address ID lower than 500?
 
 ```sql
-select customer_id, first_name, last_name
-from customer
-where first_name like 'E%' and address_id < 500
-order by customer_id desc
-limit 1
+SELECT customer_id, first_name FROM customer
+WHERE first_name LIKE 'E%' and address_id < 500
+ORDER BY customer_id DESC
+LIMIT 1
 ```
-
-Wrong answer:
-
-```sql
-select max(customer_id), first_name, last_name
-from customer
-where first_name ilike 'E%'
-	and address_id < 5000
--- group by
--- having
--- order by
--- limit
-```
-
 
 # 7. JOIN Clause
 
