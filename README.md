@@ -293,10 +293,7 @@ SOLUTION:
 ```sql
 -- task: find the email for the customer with the name Nancy Thomas
 
--- return the columns of the customer table
--- select * from customer where 1=0
-
-SELECT first_name, last_name FROM customer
+SELECT first_name, last_name, email FROM customer
 WHERE first_name = 'Nancy' AND last_name = 'Thomas';
 ```
 
