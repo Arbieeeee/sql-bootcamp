@@ -301,7 +301,7 @@ WHERE first_name = 'Nancy' AND last_name = 'Thomas';
 
 SOLUTION:
 ```sql
-SELECT description FROM film
+SELECT title, description FROM film
 WHERE title = 'Outlaw Hanky';
 ```
 
@@ -309,7 +309,7 @@ WHERE title = 'Outlaw Hanky';
 
 SOLUTION:
 ```sql
-SELECT phone FROM address
+SELECT address, phone FROM address
 WHERE address = '259 Ipoh Drive';
 ```
 
