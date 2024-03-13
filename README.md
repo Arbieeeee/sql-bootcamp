@@ -8,7 +8,7 @@ Databases are systems that allow users to store and organize data and are useful
 
 Databases are suitable for data integrity, handling large amounts of data, combining different datasets quickly, automating reuse steps, and supporting data for websites and applications.
 
-A **database** is a collection of tables. **Tables** contain rows and columns, where the **rows** are known as **records** and the **columns** are known as **fields**. A **column** is a set of data values of a particular type, one value for each row of the database. A **row** represents a single data item in a table, and every row in the table has the same structure.
+A **database** is a collection of tables. **Tables** contain rows and columns, where the **rows** are known as **records** and the **columns** are known as **fields**. A **column** is a set of data values of a particular type, one value for each row of the database. A **row** reparesents a single data item in a table, and every row in the table has the same structure.
 
 <!-- omit in toc -->
 ## Table of Contents
@@ -1783,7 +1783,7 @@ How can you retrieve all the information from the cd.facilities table?
 
 ```sql
 SELECT *
-from cd.facilites
+from cd.facilities
 ```
 
 You want to print out a list of all of the facilities and their cost to members. How would you retrieve a list of only facility names and costs?
