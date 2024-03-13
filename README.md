@@ -3379,6 +3379,7 @@ select * from employee
 order by emp_ID
 limit 1 offset 1
 ```
+![image](https://github.com/Arbieeeee/sql-bootcamp/assets/158314661/9ae3aa6a-e372-4fee-be80-68b06cf20c8d)
 
 ## 18.3. Exercise 3
 
@@ -3438,6 +3439,7 @@ SELECT emp_name, dept_name, salary
 FROM r
 WHERE salary_max = 1 OR salary_min = 1
 ```
+![image](https://github.com/Arbieeeee/sql-bootcamp/assets/158314661/ee2a5594-d7aa-4567-9a4b-707ba5c8f853)
 
 ## 18.4. Exercise 4
 
@@ -3475,6 +3477,7 @@ select d2.id, d2.name, d2.speciality, d2.hospital, d2.city, d2.consultation_fee 
 join doctors d2 on d2.hospital = d.hospital
 where d2.speciality != d.speciality
 ```
+![image](https://github.com/Arbieeeee/sql-bootcamp/assets/158314661/167de332-f5b7-481f-9788-a18b94432b4e)
 
 ## 18.5. Exercise 5
 
@@ -3511,12 +3514,13 @@ insert into login_details values
 Solution:
 
 ```sql
-SELECT user_name,login_date, COUNT(login_date) AS Occurences
+SELECT user_name,login_date, COUNT(login_date) AS login_occurences
 FROM login_details
 GROUP BY login_date, user_name
 HAVING COUNT(login_date) >= 3
 ORDER BY login_date
 ```
+![image](https://github.com/Arbieeeee/sql-bootcamp/assets/158314661/91f7c8e9-e969-40e6-b6d5-cfcc54744e6c)
 
 ## 18.6. Exercise 6
 
@@ -3545,13 +3549,14 @@ insert into students values
 Solution:
 
 ```sql
-select *, 
-	case
-		when id % 2 = 1 then lead(student_name,1,student_name) over()
-		when id % 1 = 0 then lag(student_name,1,student_name) over()
-	end as new_student
-from students
+SELECT *, 
+	CASE
+		WHEN id % 2 = 1 THEN LEAD(student_name,1,student_name) OVER()
+		WHEN id % 1 = 0 THEN LAG(student_name,1,student_name) OVER()
+	END AS new_student
+FROM students
 ```
+![image](https://github.com/Arbieeeee/sql-bootcamp/assets/158314661/586f95a6-edff-480e-b2a1-c7c44f096e5f)
 
 ## 18.7. Exercise 7
 
@@ -3598,6 +3603,7 @@ ValuesCounted AS (
 SELECT id, day, temperature FROM ValuesCounted 
 WHERE consecutiveValueCount >= 3;
 ```
+![image](https://github.com/Arbieeeee/sql-bootcamp/assets/158314661/dacc311a-6d98-4b3b-8ae8-8ff124bc44be)
 
 ## 18.8. Exercise 8
 
@@ -3650,6 +3656,7 @@ FROM (
 		) patient
  WHERE patient.acc_ranking <= 2;
 ```
+![image](https://github.com/Arbieeeee/sql-bootcamp/assets/158314661/0d43cf49-7df0-4aa2-94c5-73152bda2bc5)
 
 # 19. Misc Notes
 
