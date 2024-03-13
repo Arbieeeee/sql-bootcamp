@@ -3599,8 +3599,6 @@ WHERE consecutiveValueCount >= 3;
 
 ## 18.8. Exercise 8
 
-We skipped exercise 9 because the task was not clear.
-
 ```sql
 -- Query 8:
 -- Find the top 2 accounts with the maximum number of unique patients on a monthly basis.
@@ -3632,26 +3630,23 @@ select * from patient_logs;
 Solution:
 
 ```sql
-with dp as
-  (select distinct to_char(date, 'month') as month,
-                   account_id,
-                   patient_id
-   from patient_logs
-   order by month),
-     c as
-  (select month,
-          account_id,
-          count(account_id) as c
-   from dp
-   group by month, account_id),
-     r as
-  (select *,
-          rank() over(partition by month order by c desc, account_id) as rnk
-   from c)
-select *
-from r
-where rnk < 3
-order by month, rnk
+SELECT patient.month, patient.account_id, patient.uniquepatients
+FROM (
+	SELECT count_patient.month, count_patient.account_id, count_patient.uniquepatients,
+	ROW_NUMBER() OVER(PARTITION BY count_patient.month
+					  ORDER BY count_patient.uniquepatients DESC,
+					  count_patient.account_id) AS acc_ranking 
+ FROM(
+		-- count unique patients
+		SELECT dis_month.month, dis_month.account_id, COUNT(patient_id) AS uniquepatients 
+		FROM(
+			-- conversion of date as month
+			SELECT DISTINCT account_id,patient_id, to_char(date, 'Month') as month
+			FROM patient_logs) dis_month
+		GROUP BY dis_month.month, dis_month.account_id
+		) count_patient 
+		) patient
+ WHERE patient.acc_ranking <= 2;
 ```
 
 # 19. Misc Notes
