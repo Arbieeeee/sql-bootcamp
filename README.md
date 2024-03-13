@@ -3313,6 +3313,7 @@ ON tableA.user_name = tableB.user_name
 AND tableA.email = tableB.email
 ORDER BY tableA.email
 ```
+![image](https://github.com/Arbieeeee/sql-bootcamp/assets/158314661/143323fc-7e2a-48e4-922c-8dda54c006ff)
 
 Solution from video: Use a window function with `row_number()`.
 
