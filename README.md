@@ -3302,15 +3302,16 @@ from users;
 Solution:
 
 ```sql
---select max(user_id), user_name, email
---from users
---group by user_name, email
---having count(user_name) > 1 and count(email) > 1
-
-select user_name, email, count(*) as no_of_duplicates
-from users
-group by user_name, email
-having count(*) > 1
+SELECT tableA.* FROM users tableA
+JOIN (
+	-- show duplicate accounts of the first row appeared
+	SELECT user_name, email, COUNT(*)
+	FROM users 
+	GROUP BY user_name, email
+	HAVING COUNT(*) > 1 ) tableB
+ON tableA.user_name = tableB.user_name
+AND tableA.email = tableB.email
+ORDER BY tableA.email
 ```
 
 Solution from video: Use a window function with `row_number()`.
